@@ -1,289 +1,365 @@
-# PocketLLM Portal
+# 🤖 PocketLLM
 
-A full-stack AI chat application with Ollama LLM integration, MongoDB persistence, user authentication, and admin dashboard.
+> An intelligent chat application with local LLM integration, document-backed evidence retrieval, and session management
 
-## Features
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
+[![Node](https://img.shields.io/badge/Node-20+-green.svg)](https://nodejs.org/)
 
-- **Ollama LLM Integration**: Run Llama 2 or other models locally for AI responses
-- **MongoDB Persistence**: Secure data storage with MongoDB Atlas support
-- **User Authentication**: JWT-based register/login system
-- **Chat Sessions**: Create, rename, delete, and export conversations
-- **Real-time Streaming**: SSE streaming for smooth chat responses
-- **Admin Dashboard**: Monitor metrics, logs, and system stats
-- **Docker Support**: Complete Docker Compose setup with all services
+**PocketLLM** is a full-stack AI chat application that runs entirely on your machine. It leverages Ollama for local LLM inference, MongoDB for persistent storage, and a React frontend for an intuitive user experience. Upload documents for evidence-backed responses, manage multiple chat sessions, and maintain complete control over your data.
 
-## Database
+---
 
-**MongoDB** is used for persistent storage with Mongoose ODM.
+## ✨ Key Features
 
-- **Options**: MongoDB Atlas (cloud) or local MongoDB
-- **Collections**: users, chat_sessions, messages, logs
-- **Docker**: MongoDB container auto-initialized with credentials
-- **Connection**: `MONGODB_URI` environment variable
+### 🧠 **Intelligent Chat**
+- **Local LLM Integration**: Powered by Ollama (Llama 2 7B Chat model)
+- **Streaming Responses**: Real-time Server-Sent Events (SSE) for smooth interactions
+- **Session Isolation**: Switch between chats without losing context
+- **Abort Control**: Stop streaming responses mid-generation
 
-## Tech Stack
+### 📚 **Document Evidence System**
+- **Upload Knowledge Base**: Add text files, markdown, or paste content directly
+- **TF-IDF Search**: Smart relevance ranking using NLP (Porter Stemmer + stopwords)
+- **Cited Sources**: See which documents informed each response
+- **Drag & Drop**: Easy file uploads with visual feedback
 
-### Frontend
-- React 18
-- React Router v6
-- Axios
-- TailwindCSS (responsive styling)
+### 💾 **Session Management**
+- **Persistent History**: All conversations saved to MongoDB
+- **Export Chats**: Download sessions as JSON
+- **Auto-titling**: First message becomes session title
+- **Rename/Delete**: Full control over your chat library
 
-### Backend
-- Node.js + Express
-- **MongoDB** with Mongoose ODM
-- **Ollama** LLM API integration
-- JWT Authentication
-- Server-Sent Events (SSE) for streaming
+### 🎨 **Modern UI**
+- **Responsive Design**: TailwindCSS with mobile-first approach
+- **Skeleton Loaders**: Fast perceived performance
+- **Relative Timestamps**: Human-readable time formatting
+- **Collapsible Evidence**: Clean, distraction-free reading
 
-### Infrastructure
-- Docker & Docker Compose
-- Ollama container with Llama 2 7B Chat model
+### 🔐 **Security & Admin**
+- **JWT Authentication**: Secure user sessions
+- **Role-based Access**: Admin dashboard with metrics
+- **Request Logging**: Track API usage and performance
+- **Environment Secrets**: Secure credential management
 
-## Quick Start
+---
+
+## 🏗️ Architecture
+
+### System Overview
+```
+┌─────────────┐      ┌──────────────┐      ┌─────────────┐
+│   React     │ HTTP │   Express    │ HTTP │   Ollama    │
+│  Frontend   │─────▶│   Backend    │─────▶│  LLM API    │
+│  (Port 80)  │      │  (Port 5001) │      │ (Port 11434)│
+└─────────────┘      └──────────────┘      └─────────────┘
+                            │
+                            │ Mongoose
+                            ▼
+                     ┌─────────────┐
+                     │   MongoDB   │
+                     │ (Port 27017)│
+                     └─────────────┘
+```
+
+**See detailed diagrams:** [deliverables/](./deliverables/)
+- Component Architecture (Descriptive & Prescriptive)
+- Deployment Diagram
+- Use Case Diagram
+- Backend & Frontend Structure
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
-- Docker & Docker Compose (recommended)
-- Node.js 20+ (for local development)
+- **Docker** & **Docker Compose** (recommended)
+- **Node.js 20+** (for local development)
+- 8GB+ RAM (for LLM inference)
 
 ### Option 1: Docker Compose (Recommended)
 
-\`\`\`bash
-cd backend
-docker-compose up --build
-\`\`\`
+```bash
+# Clone the repository
+git clone https://github.com/kushalac/PocketLLM.git
+cd PocketLLM
 
-Services start at:
-- Frontend: http://localhost:3000
-- Backend: http://localhost:5000
-- Ollama: http://localhost:11434
-- MongoDB: localhost:27017 (internal)
+# Start all services
+docker-compose up -d
 
-First startup takes 2-5 minutes (Ollama downloads ~4GB Llama 2 model).
+# Wait for Ollama model download (~4GB)
+docker logs -f pocketllm-ollama
+
+# Access the app
+open http://localhost
+```
+
+**Services Started:**
+- Frontend: `http://localhost` (port 80)
+- Backend API: `http://localhost:5001`
+- Ollama: `http://localhost:11434`
+- MongoDB: `mongodb://localhost:27017`
 
 ### Option 2: Local Development
 
-**Terminal 1 - Backend:**
-\`\`\`bash
+```bash
+# 1. Start MongoDB & Ollama separately
+docker-compose up mongodb ollama -d
+
+# 2. Install backend dependencies
 cd backend
 npm install
-cp .env.example .env
-# Update MONGODB_URI in .env
-npm run dev
-\`\`\`
+npm start
 
-**Terminal 2 - Frontend:**
-\`\`\`bash
+# 3. Install frontend dependencies (separate terminal)
 cd frontend
 npm install
 npm start
-\`\`\`
+```
 
-## Environment Configuration
+---
 
-### Backend (.env)
-\`\`\`bash
-PORT=5000
-NODE_ENV=development
-JWT_SECRET=dev_secret_key_change_in_production
-MONGODB_URI=mongodb://root:password@localhost:27017/pocketllm?authSource=admin
-OLLAMA_URL=http://localhost:11434/api/generate
-OLLAMA_MODEL=llama2:7b-chat
-\`\`\`
+## 📖 Usage Guide
 
-### Frontend (.env)
-\`\`\`
-REACT_APP_API_URL=http://localhost:5000/api
-\`\`\`
+### First-Time Setup
 
-## MongoDB Setup
+1. **Register Account**: Create your user account at `/register`
+2. **Start Chat**: Click "New Chat" to begin a conversation
+3. **Upload Documents** (Optional):
+   - Click "Docs" in the header
+   - Drag & drop `.txt` or `.md` files, or paste content
+   - Documents will be cited when relevant
 
-### Local MongoDB
-\`\`\`bash
-# Install MongoDB or use Docker
-docker run -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=root -e MONGO_INITDB_ROOT_PASSWORD=password mongo:7.0
-\`\`\`
+### Chat Interface
 
-### MongoDB Atlas (Production)
-1. Create account at [atlas.mongodb.com](https://atlas.mongodb.com)
-2. Create cluster and get connection string
-3. Update `MONGODB_URI` with production credentials
+- **Send Message**: Type and press Enter (Shift+Enter for newline)
+- **Stop Response**: Click "Stop" button during streaming
+- **View Sources**: Expand evidence cards below assistant replies
+- **Switch Sessions**: Click any chat in the sidebar (instant cache)
 
-## Ollama Configuration
+### Admin Dashboard
 
-### Using Default Model
-The setup automatically uses `llama2:7b-chat`. To use a different model:
+Access at `/admin` (requires admin privileges):
+- **Metrics**: Request counts, response times, error rates
+- **Logs**: View recent API activity
+- **Health**: Check Ollama and MongoDB status
 
-\`\`\`bash
-# Pull different model
-docker-compose exec ollama ollama pull mistral:7b
+---
 
-# Update .env
-OLLAMA_MODEL=mistral:7b
-\`\`\`
+## 🛠️ Tech Stack
 
-### Popular Models
-- `llama2:7b-chat` - Default, balanced performance
-- `neural-chat:7b` - Faster responses (~10s)
-- `mistral:7b` - Better quality (~15s)
-- `llama2:13b-chat` - More powerful (~40s, requires 25GB)
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend** | React 18, React Router v6, TailwindCSS, Axios |
+| **Backend** | Node.js, Express, Mongoose, JWT, SSE |
+| **Database** | MongoDB (Mongoose ODM) |
+| **LLM** | Ollama (Llama 2 7B Chat) |
+| **NLP** | Natural (TF-IDF, Porter Stemmer, Stopwords) |
+| **DevOps** | Docker, Docker Compose, Nginx |
 
-## Troubleshooting
+---
 
-### Ollama not connecting
-\`\`\`bash
-# Check Ollama status
-curl http://localhost:11434/api/tags
+## 📁 Project Structure
 
-# Restart Ollama service
-docker-compose restart ollama
-\`\`\`
-
-### MongoDB connection failed
-\`\`\`bash
-# Verify credentials in .env match docker-compose.yml
-# Check MongoDB logs
-docker-compose logs mongodb
-\`\`\`
-
-### Signup/Login fails
-- Ensure backend is running on port 5000
-- Check browser console (F12) for errors
-- Verify MongoDB is connected: `curl http://localhost:5000/api/health`
-
-### No styling visible
-- Hard refresh browser (Ctrl+Shift+R)
-- Clear browser cache
-- Restart frontend
-
-### Port already in use
-Change ports in `docker-compose.yml` or use custom project name:
-\`\`\`bash
-docker-compose -p custom_name up
-\`\`\`
-
-## Project Structure
-
-\`\`\`
-.
-├── frontend/                 # React frontend
+```
+PocketLLM/
+├── frontend/              # React application
 │   ├── src/
-│   │   ├── core/
-│   │   ├── features/
-│   │   ├── components/
-│   │   └── index.jsx
-│   └── package.json
+│   │   ├── features/      # Chat, History, Admin pages
+│   │   ├── components/    # Reusable UI components
+│   │   ├── core/          # API services
+│   │   └── App.jsx
+│   ├── Dockerfile
+│   └── nginx.conf
 │
-├── backend/                  # Node.js backend
-│   ├── models/               # New: Mongoose models
-│   │   ├── User.js
-│   │   ├── ChatSession.js
-│   │   ├── Message.js
-│   │   └── Log.js
-│   ├── services/
-│   │   ├── ChatService.js    # Updated for MongoDB
-│   │   ├── LLMService.js     # Updated for Ollama
-│   │   ├── CacheService.js
-│   │   ├── MetricsService.js
-│   │   └── LogService.js
-│   ├── controllers/
-│   ├── routes/
-│   ├── db/
-│   │   └── connection.js     # Updated for MongoDB
-│   ├── server.js             # Added health check
-│   └── package.json
+├── backend/               # Express API server
+│   ├── controllers/       # Route handlers
+│   ├── models/            # Mongoose schemas
+│   ├── services/          # Business logic
+│   │   ├── ChatService.js
+│   │   ├── DocumentService.js  # TF-IDF search
+│   │   └── LLMService.js       # Ollama integration
+│   ├── routes/            # API endpoints
+│   ├── middleware/        # Auth, logging
+│   ├── server.js
+│   └── Dockerfile
 │
-├── MONGODB_OLLAMA_SETUP.md   # New: Detailed setup guide
-├── docker-compose.yml        # Added Ollama & MongoDB services
-├── README.md
-└── Dockerfile
-\`\`\`
+├── deliverables/          # Architecture & documentation
+│   ├── *.puml             # PlantUML diagrams
+│   ├── *.png              # Rendered diagrams
+│   └── report.pdf         # Full project report
+│
+├── docker-compose.yml     # Multi-container setup
+├── .env.example           # Environment template
+└── README.md
+```
 
-## API Reference
+---
 
-### Health Check
-\`\`\`
-GET /api/health
-\`\`\`
+## 🔧 Configuration
 
-Returns service status including Ollama connection.
+### Environment Variables
+
+Create `.env` files in both `frontend/` and `backend/`:
+
+**Backend (`backend/.env`):**
+```env
+PORT=5001
+MONGODB_URI=mongodb://mongodb:27017/pocketllm
+OLLAMA_BASE_URL=http://ollama:11434
+JWT_SECRET=your-secret-key-here
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=securepassword
+```
+
+**Frontend (`frontend/.env`):**
+```env
+REACT_APP_API_BASE_URL=http://localhost:5001
+```
+
+### MongoDB Setup
+
+**Option A: MongoDB Atlas (Cloud)**
+1. Create cluster at [mongodb.com/atlas](https://www.mongodb.com/cloud/atlas)
+2. Get connection string
+3. Update `MONGODB_URI` in `backend/.env`
+
+**Option B: Local MongoDB (Docker)**
+- Already configured in `docker-compose.yml`
+- Default: `mongodb://root:example@mongodb:27017/pocketllm?authSource=admin`
+
+---
+
+## 📊 API Endpoints
 
 ### Authentication
-\`\`\`
-POST /api/auth/register
-POST /api/auth/login
-\`\`\`
+- `POST /api/auth/register` - Create user account
+- `POST /api/auth/login` - Get JWT token
 
 ### Chat
-\`\`\`
-POST /api/chat/start-session
-GET /api/chat/sessions
-POST /api/chat/message          # SSE streaming
-PUT /api/chat/:sessionId/rename
-DELETE /api/chat/:sessionId
-GET /api/chat/:sessionId/export
-\`\`\`
+- `GET /api/chat/sessions` - List all sessions
+- `POST /api/chat/session` - Start new chat
+- `POST /api/chat/message` - Send message (SSE response)
+- `GET /api/chat/messages/:sessionId` - Get chat history
+
+### Documents
+- `GET /api/chat/documents` - List uploaded docs
+- `POST /api/chat/documents` - Upload new document
+- `DELETE /api/chat/documents/:id` - Remove document
 
 ### Admin
-\`\`\`
-GET /api/admin/metrics
-GET /api/admin/cache-stats
-GET /api/admin/logs
-\`\`\`
+- `GET /api/admin/metrics` - System metrics
+- `GET /api/admin/logs` - Recent API logs
+- `GET /api/admin/health` - Service health checks
 
-## Docker Deployment
+---
 
-\`\`\`bash
+## 🧪 Testing
+
+```bash
+# Backend tests
 cd backend
-docker-compose up --build
-\`\`\`
+npm test
 
-Services:
-- **Frontend**: React app on port 3000
-- **Backend**: Express API on port 5000
-- **Ollama**: LLM inference on port 11434
-- **MongoDB**: Document database (internal)
+# Run with coverage
+npm run test:coverage
+```
 
-All services are configured to communicate automatically.
+---
 
-## Production Deployment
+## 🎥 Demo
 
-### MongoDB Atlas
-Set `MONGODB_URI` to your Atlas connection string:
-\`\`\`
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/pocketllm?retryWrites=true&w=majority
-\`\`\`
+**Video Walkthrough**: See `Pocket-LLM.mp4` in the repository root
 
-### Ollama on Server
-Install Ollama and set:
-\`\`\`
-OLLAMA_URL=http://server-ip:11434/api/generate
-\`\`\`
+**Screenshots**:
 
-### Security
-\`\`\`bash
-# Generate secure JWT secret
-openssl rand -base64 32
+| Feature | Preview |
+|---------|---------|
+| Chat Interface | ![Chat](deliverables/pocketllm_frontend_descriptive.png) |
+| Document Upload | Evidence-backed responses with citations |
+| Session History | Searchable chat library with timestamps |
 
-# Set in environment
-JWT_SECRET=<generated-secret>
-NODE_ENV=production
-\`\`\`
+---
 
-## Documentation
+## 🤝 Contributing
 
-- **MONGODB_OLLAMA_SETUP.md** - Detailed MongoDB & Ollama setup
-- **SETUP.md** - Comprehensive setup guide
-- **QUICK_START.md** - Quick reference
+Contributions welcome! Please follow these guidelines:
 
-## Support
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit with descriptive messages (`git commit -m 'feat: add amazing feature'`)
+4. Push to your branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-For issues:
-1. Check Troubleshooting section
-2. Review logs: `docker-compose logs -f`
-3. Check API health: `curl http://localhost:5000/api/health`
-4. See MONGODB_OLLAMA_SETUP.md for detailed guidance
+**Commit Convention:**
+- `feat:` New features
+- `fix:` Bug fixes
+- `docs:` Documentation updates
+- `refactor:` Code refactoring
+- `test:` Test additions/modifications
+- `chore:` Maintenance tasks
 
-## License
+---
 
-MIT
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+```
+MIT License
+
+Copyright (c) 2025 PocketLLM Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+---
+
+## 🙏 Acknowledgments
+
+- **Ollama Team** for local LLM inference capabilities
+- **MongoDB** for robust document storage
+- **Natural NLP** for text processing utilities
+- **React Community** for excellent frontend tooling
+
+---
+
+## 📬 Contact
+
+**Project Link**: [https://github.com/kushalac/PocketLLM](https://github.com/kushalac/PocketLLM)
+
+**Contributors**:
+- Hitesh Narayan - [@hiteshnarayan](https://github.com/hiteshnarayan)
+- Kushal - [@kushalac](https://github.com/kushalac)
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] IndexedDB caching for offline-first experience
+- [ ] Multi-model support (GPT-4, Claude, etc.)
+- [ ] Voice input/output
+- [ ] Code syntax highlighting in responses
+- [ ] Bulk document operations
+- [ ] Mobile app (React Native)
+- [ ] RAG pipeline improvements
+
+---
+
+**Built with ❤️ for privacy-conscious AI interactions**
