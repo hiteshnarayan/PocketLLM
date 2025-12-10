@@ -1,0 +1,101 @@
+@startuml pocketllm_component_descriptive
+top to bottom direction
+skinparam componentStyle rectangle
+
+package "Frontend (Client-Side)" {
+    component "React App (CRA)" {
+        [AppRouter (App.jsx)] as Router
+        
+        package "UI Components" {
+            [ChatInterface]
+            [DocsPanel]
+            [AdminDashboard]
+            
+            folder "Other Pages" {
+                [HomePage]
+                [HistoryPage]
+                [AuthPages]
+            }
+        }
+
+        package "Client Services" {
+            [ApiService]
+            [AuthService]
+            [ChatSessionService]
+            [DocumentService]
+            [IndexedDBCache]
+        }
+    }
+}
+
+package "Backend (Server-Side)" {
+    component "Node.js Monolith" {
+        [Express Server] as Server
+        
+        package "Controllers" {
+            [AuthController]
+            [ChatController]
+            [AdminController]
+            [PreferencesController]
+        }
+
+        package "Business Logic" {
+            [ChatService]
+            [LLMService]
+            [DocumentService\n(TF-IDF)] as TFIDF
+            [MetricsService]
+            [CacheService]
+            [LogService]
+            [UserPreferencesService]
+        }
+    }
+}
+
+package "Infrastructure" {
+    component "Ollama" {
+        [Llama 2 Model]
+    }
+    
+    database "MongoDB" {
+        [PocketLLM DB]
+    }
+}
+
+' Layout Helpers (Vertical Stacking)
+Router -[hidden]-> "UI Components"
+"UI Components" -[hidden]-> "Client Services"
+[ChatInterface] -[hidden]-> [DocsPanel]
+[DocsPanel] -[hidden]-> "Other Pages"
+
+Server -[hidden]-> "Controllers"
+"Controllers" -[hidden]-> "Business Logic"
+
+' Relationships
+Router --> [ChatInterface]
+Router --> [AdminDashboard]
+Router --> [HomePage]
+
+[ChatInterface] --> [DocsPanel] : includes
+[ChatInterface] --> [ChatSessionService]
+[AdminDashboard] --> [ApiService]
+[AuthPages] --> [AuthService]
+
+[ApiService] ==> Server : REST/SSE
+
+Server --> [AuthController]
+Server --> [ChatController]
+Server --> [AdminController]
+
+[ChatController] --> [ChatService]
+[ChatService] --> [LLMService]
+[ChatService] --> [TFIDF]
+
+[LLMService] --> [Llama 2 Model] : HTTP
+[Business Logic] --> [PocketLLM DB] : Mongoose
+
+note right of TFIDF
+  <b>Drift:</b> In-memory TF-IDF
+  instead of Vector DB
+end note
+
+@enduml

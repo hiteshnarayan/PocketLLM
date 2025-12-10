@@ -1,0 +1,53 @@
+@startuml pocketllm_usecase_prescriptive
+left to right direction
+skinparam packageStyle rectangle
+
+actor "End User" as user
+actor "Administrator" as admin
+actor "Developer" as dev
+
+rectangle "PocketLLM Portal System" {
+  package "Chat & RAG" {
+    usecase "Chat with LLM" as UC1
+    usecase "Manage Chat Sessions" as UC2
+    usecase "View Chat History" as UC3
+    usecase "Upload Documents" as UC4
+    usecase "Search Documents" as UC5
+  }
+
+  package "Administration" {
+    usecase "Configure Model Settings" as UC6
+    usecase "Monitor System Health" as UC7
+  }
+
+  package "Development" {
+    usecase "View API Documentation" as UC8
+  }
+}
+
+' User relationships
+user --> UC1
+user --> UC2
+user --> UC3
+user --> UC4
+user --> UC5
+
+' Admin relationships (Admins are also Users, usually, but explicit links are clearer)
+admin --> UC1
+admin --> UC6
+admin --> UC7
+
+' Developer relationships
+dev --> UC1
+dev --> UC8
+
+note bottom of UC1
+  Includes real-time streaming
+  and context awareness
+end note
+
+note bottom of UC4
+  "Document Assistant" feature
+  for RAG context
+end note
+@enduml

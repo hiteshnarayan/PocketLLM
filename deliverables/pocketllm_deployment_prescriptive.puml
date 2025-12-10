@@ -1,0 +1,36 @@
+@startuml pocketllm_deployment_prescriptive
+left to right direction
+
+node "User Workstation" {
+    component "Web Browser" {
+        [React SPA Frontend]
+    }
+}
+
+node "PocketLLM Host Server" {
+    node "Docker / Runtime Environment" {
+        component "Reverse Proxy (Nginx)" as WebServer
+        
+        node "App Container" {
+            component "API Gateway"
+            component "Backend Services"
+        }
+        
+        node "Model Container" {
+            component "Model Serving Service"
+            artifact "LLM Weights (CPU Optimized)"
+        }
+    }
+    
+    database "MongoDB (Data)"
+    database "Vector Index (Embeddings)"
+}
+
+[React SPA Frontend] --> WebServer : HTTPS
+WebServer --> [API Gateway]
+[API Gateway] --> [Backend Services]
+[Backend Services] --> [MongoDB]
+[Backend Services] --> [Vector Index]
+[Backend Services] --> [Model Serving Service] : Internal Network
+
+@enduml

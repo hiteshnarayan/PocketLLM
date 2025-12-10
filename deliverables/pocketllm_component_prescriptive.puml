@@ -1,0 +1,68 @@
+@startuml pocketllm_component_prescriptive
+top to bottom direction
+
+package "Presentation Layer (React SPA)" {
+    component [AppShell]
+    component [Router]
+    
+    package "Pages" {
+        [ChatPage]
+        [SearchPage]
+        [HistoryPage]
+        [AdminPage]
+        [DocsPage]
+    }
+    
+    component [AuthContext]
+    component [ApiClient]
+    
+    [AppShell] --> [Router]
+    [Router] --> [ChatPage]
+    [Router] --> [SearchPage]
+    [Router] --> [HistoryPage]
+    [Router] --> [AdminPage]
+    [Router] --> [DocsPage]
+    
+    [ChatPage] ..> [ApiClient]
+    [SearchPage] ..> [ApiClient]
+    [HistoryPage] ..> [ApiClient]
+    [AdminPage] ..> [ApiClient]
+    [DocsPage] ..> [ApiClient]
+}
+
+package "Application Layer (Backend Services)" {
+    component [API Gateway]
+    
+    package "Microservices / Modules" {
+        [Auth Service]
+        [Chat Service]
+        [Retrieval Service]
+        [Metrics Service]
+        [Model Serving Service]
+    }
+    
+    [API Gateway] --> [Auth Service]
+    [API Gateway] --> [Chat Service]
+    [API Gateway] --> [Retrieval Service]
+    [API Gateway] --> [Metrics Service]
+    
+    [Chat Service] --> [Model Serving Service] : Request Inference
+    [Retrieval Service] --> [Model Serving Service] : Generate Embeddings
+}
+
+package "Data Layer" {
+    database "User DB"
+    database "Document Store"
+    database "Vector Index"
+    database "Metrics Store"
+}
+
+[ApiClient] ==> [API Gateway] : HTTPS / REST
+
+[Auth Service] --> [User DB]
+[Chat Service] --> [User DB]
+[Retrieval Service] --> [Document Store]
+[Retrieval Service] --> [Vector Index]
+[Metrics Service] --> [Metrics Store]
+
+@enduml
